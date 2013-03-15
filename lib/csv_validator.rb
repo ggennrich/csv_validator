@@ -20,7 +20,7 @@ class CsvValidator < ActiveModel::EachValidator
     
     begin
       csv = CSV.read(value.path)
-      csv.shift(1)
+      csv.shift(1) if options[:has_headers]
     rescue CSV::MalformedCSVError
       record.errors.add(attribute, options[:message] || "is not a valid CSV file")
       return
