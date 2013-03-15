@@ -100,7 +100,7 @@ class CsvValidator < ActiveModel::EachValidator
   def column_to_array(csv, column_index)
     column_contents = []
     csv.each do |column|    
-      column_contents << column[column_index].strip
+      column_contents << column[column_index].to_s.strip
     end
     column_contents
   end
