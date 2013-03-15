@@ -73,8 +73,8 @@ class CsvValidator < ActiveModel::EachValidator
       end
     end
 
-    if options[:regex_string]
-      options[:regex_string].each do |column, regex|
+    if options[:string_regex]
+      options[:string_regex].each do |column, regex|
         strings = column_to_array(csv, column)
         strings.each do |string|
           unless regex_match?(string, regex)
@@ -105,5 +105,8 @@ class CsvValidator < ActiveModel::EachValidator
   
   def regex_match?(string, regex)
     string.scan(regex).present?
+    true
+  rescue
+    false
   end
 end
