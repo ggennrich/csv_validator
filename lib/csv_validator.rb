@@ -61,38 +61,29 @@ class CsvValidator < ActiveModel::EachValidator
       end
     end
 
-    if options[:email]
-      emails = column_to_array(csv, options[:email])
-      invalid_emails = []
-      emails.each do |email|
-        begin
-          address = Mail::Address.new email
-          valid = address.address == email && address.domain
-          tree = address.__send__(:tree)        
-          valid &&= (tree.domain.dot_atom_text.elements.size > 1)
-        rescue
-          valid = false
+    if options[:numericality]
+      options[:numericality].each do |column|
+        numbers = column_to_array(csv, column)
+        numbers.each do |number|
+          unless is_numeric?(number)
+            record.errors.add(attribute, options[:message] || "contains non-numeric content in column #{column+1}")
+            break
+          end
         end
-        unless valid
-          invalid_emails << email
-        end
-      end
-      
-      if invalid_emails.length > 0
-        record.errors.add(attribute, options[:message] || "contains invalid emails (#{invalid_emails.join(', ')})")
       end
     end
 
-    if options[:numericality]
-      numbers = column_to_array(csv, options[:numericality])
-      numbers.each do |number|
-        unless is_numeric?(number)
-          record.errors.add(attribute, options[:message] || "contains non-numeric content in column #{options[:numericality]}")
-          return
+    if options[:regex_string]
+      options[:regex_string].each do |column, regex|
+        strings = column_to_array(csv, column)
+        strings.each do |string|
+          unless regex_match?(string, regex)
+            record.errors.add(attribute, options[:message] || "contains unexpected characters in column #{column+1}")
+            break
+          end
         end
       end
     end
-    
   end
   
   private
@@ -112,5 +103,7 @@ class CsvValidator < ActiveModel::EachValidator
     false
   end
   
-  
+  def regex_match?(string, regex)
+    string.scan(regex).present?
+  end
 end
