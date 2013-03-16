@@ -98,7 +98,7 @@ class CsvValidator < ActiveModel::EachValidator
   end
   
   def is_numeric?(string)
-    Float(string)
+    string.blank? ? string.to_f : Float(string)
     true 
   rescue 
     false
